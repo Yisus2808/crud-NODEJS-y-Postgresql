@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Formulario de departamento</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <nav>
+        <ul id="menu">
+            <li><a href="empleado">Registrar Empleado</a></li>
+            <li><a href="departamento">Registrar departamento</a></li>
+        </ul>
+    </nav>
+
+    <h1>Formulario de departamento</h1>
+
+    <form id="registrarse" onsubmit="return validateFormDepartamento()" action="/departamento" method="post">
+        <label for="nombre">Nombre del departamento:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <br>
+
+        <input type="submit" value="Registrarse">
+    </form>
+
+    <h1>Departamentos</h1>
+
+    <% if (datos_departamento.length > 0) { %>
+        <ul>
+            <% datos_departamento.forEach((item) => { %>
+                <li>
+                    <%= item.id_departamento %>
+                </li>
+                <li>
+                    <%= item.nombre %>
+                </li>
+                <% }); %>
+        </ul>
+        <% } else { %>
+            <p>No se encontraron datos_departamento</p>
+            <% } %>
+
+
+                <script src="script.js"></script>
+</body>
+
+</html>

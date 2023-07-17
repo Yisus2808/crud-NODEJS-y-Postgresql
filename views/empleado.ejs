@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Formulario de empleado</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <nav>
+        <ul id="menu">
+            <li><a href="empleado">Registrar Empleado</a></li>
+            <li><a href="departamento">Registrar departamento</a></li>
+        </ul>
+    </nav>
+
+    <h1>Formulario de Empleado</h1>
+
+    <form id="registrarse" onsubmit="return validateFormEmpleado()" action="/empleado" method="post">
+        <label for="nombre">Nombre de empleado:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <br>
+
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" name="apellido" required>
+        <br>
+
+        <label for="telefono">Telefono:</label>
+        <input type="tel" id="telefono" name="telefono" required>
+        <br>
+
+        <label for="direccion">Dirreción:</label>
+        <input type="text" id="direccion" name="direccion" required>
+        <br>
+
+        <label for="fecha_naciemiento">Fecha de nacimiento:</label>
+        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+        <br>
+
+        <label for="observaciones">Observación:</label>
+        <!-- <input type="text" id="observacion" name="observacion" required> -->
+        <textarea id="observaciones" name="observaciones" required rows="4" cols="40" placeholder="Escriba sus observaciones aquí"></textarea>
+        <br>
+
+        <label for="sueldo">Sueldo:</label>
+        <input type="number" id="sueldo" name="sueldo" step="0.01" min="0" required>
+        <br>
+
+        <label for="id_departamento">Escoger departamento:</label>
+        <select id="id_departamento" name="id_departamento" required>
+            <% datos_departamento.forEach((item) => { %>
+            <option value="<%= item.id_departamento %>"><%= item.nombre %></option>
+            <% }); %>
+        </select>
+        <br>
+
+
+        <input type="submit" value="Registrarse">
+    </form>
+
+    <h1>Empleados</h1>
+
+    <% if (datos_empleado.length > 0) { %>
+        <ul>
+            <% datos_empleado.forEach((item) => { %>
+                <!-- nombre, apellido, telefono, direccion, fecha_nacimiento, observaciones, sueldo, departamento -->
+                <li>
+                    <%= item.nombre %>
+                </li>
+                <li>
+                    <%= item.apellido %>
+                </li>
+                <li>
+                    <%= item.telefono %>
+                </li>
+                <li>
+                    <%= item.direccion %>
+                </li>
+                <li>
+                    <%= item.fecha_nacimiento %>
+                </li>
+                <li>
+                    <%= item.observaciones %>
+                </li>
+                <li>
+                    <%= item.sueldo %>
+                </li>
+                <li>
+                    <%= item.id_departamento %>
+                </li>
+                <% }); %>
+        </ul>
+        <% } else { %>
+            <p>No se encontraron datos_empleado</p>
+            <% } %>
+
+
+
+                <script src="script.js"></script>
+</body>
+
+</html>
