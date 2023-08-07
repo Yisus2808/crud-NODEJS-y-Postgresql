@@ -3,7 +3,8 @@
 
 <head>
     <title>Formulario de departamento</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script type="module" src="/script.js"></script>
 </head>
 
 <body>
@@ -15,34 +16,213 @@
     </nav>
 
     <h1>Formulario de departamento</h1>
-
-    <form id="registrarse" onsubmit="return validateFormDepartamento()" action="/departamento" method="post">
+    <form id="registrarse" method="post">
         <label for="nombre">Nombre del departamento:</label>
         <input type="text" id="nombre" name="nombre" required>
         <br>
 
-        <input type="submit" value="Registrarse">
+        <input type="submit" value="Registrarse" onclick="agregarDepartamento()">
     </form>
 
     <h1>Departamentos</h1>
+    <center>
+        <% if (datos_departamento.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Departamento</th>
+                        <th>Nombre del departamento</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% datos_departamento.forEach((item) => { %>
+                        <tr id="fila-<%= item.id_departamento %>">
+                            <td class="editable" data-campo="id_departamento">
+                                <%= item.id_departamento %>
+                            </td>
+                            <td class="editable" data-campo="nombre">
+                                <%= item.nombre %>
+                            </td>
+                            <td>
+                                <button onclick="editarDepartamento('<%= item.id_departamento %>')" data-action="editar">Editar</button>
+                                <button onclick="guardarCambiosDepartamento('<%= item.id_departamento %>')" data-action="guardar" style="display: none;">Guardar</button>
+                            </td>
+                            <td>
+                                <button onclick="confirmarEliminacionDepartamento('<%= item.id_departamento %>')" data-action="eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="10">No se encontraron datos_departamento</td>
+                                </tr>
+                                <% } %>
+                </tbody>
+            </table>
+    </center>
 
-    <% if (datos_departamento.length > 0) { %>
-        <ul>
-            <% datos_departamento.forEach((item) => { %>
-                <li>
-                    <%= item.id_departamento %>
-                </li>
-                <li>
-                    <%= item.nombre %>
-                </li>
-                <% }); %>
-        </ul>
-        <% } else { %>
-            <p>No se encontraron datos_departamento</p>
-            <% } %>
 
 
-                <script src="script.js"></script>
+    <script>
+        // DEPARTAMENTO
+        // Función para agregar un nuevo departamento
+        async function agregarDepartamento() {
+            // Desactivar el botón de "Registrarse" para evitar envíos duplicados
+            const botonRegistrar = document.querySelector('input[type="submit"]');
+            botonRegistrar.disabled = true;
+
+            // Obtener el nombre del departamento ingresado por el usuario
+            const nombreDepartamento = document.getElementById('nombre').value;
+
+            // Crear un objeto con los datos del nuevo departamento
+            const nuevoDepartamento = {
+                nombre: nombreDepartamento
+            };
+
+            try {
+                // Realizar la solicitud POST para agregar el departamento
+                const response = await fetch('/departamento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(nuevoDepartamento)
+                });
+
+                if (response.ok) {
+                    // Mostrar la alerta de éxito
+                    alert('Departamento agregado correctamente');
+
+                    // Recargar la página para ver los cambios
+                    window.location.reload();
+                } else {
+                    // Mostrar la alerta de error si no se pudo agregar el departamento
+                    const errorMessage = await response.text();
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.error('Error al agregar el empleado:', error);
+            } finally {
+                // Habilitar nuevamente el botón de "Registrarse" después de procesar la solicitud
+                botonRegistrar.disabled = false;
+            }
+        }
+
+        let isEditingDepartamento = false; // Variable para controlar si se está editando el campo del departamento
+
+        function editarDepartamento(departamentoId) {
+            if (!isEditingDepartamento) {
+                const fila = document.getElementById(`fila-${departamentoId}`);
+                const campoNombre = fila.querySelector('.editable[data-campo="nombre"]');
+
+                campoNombre.setAttribute('contenteditable', 'true'); // Habilitar la edición del contenido
+
+                // Mostrar el botón de "Guardar" y ocultar el botón de "Editar"
+                const editarButton = fila.querySelector('button[data-action="editar"]');
+                const guardarButton = fila.querySelector('button[data-action="guardar"]');
+                editarButton.style.display = 'none';
+                guardarButton.style.display = 'inline';
+
+                isEditingDepartamento = true; // Establecer que se está editando
+            }
+        }
+
+        function disableEditingDepartamento(departamentoId) {
+            if (isEditingDepartamento) {
+                const fila = document.getElementById(`fila-${departamentoId}`);
+                const campoNombre = fila.querySelector('.editable[data-campo="nombre"]');
+
+                campoNombre.removeAttribute('contenteditable'); // Deshabilitar la edición del contenido
+
+                // Mostrar el botón de "Editar" y ocultar el botón de "Guardar"
+                const editarButton = fila.querySelector('button[data-action="editar"]');
+                const guardarButton = fila.querySelector('button[data-action="guardar"]');
+                editarButton.style.display = 'inline';
+                guardarButton.style.display = 'none';
+
+                isEditingDepartamento = false; // Establecer que se ha terminado la edición
+            }
+        }
+
+        function guardarCambiosDepartamento(departamentoId) {
+            if (isEditingDepartamento) {
+                const fila = document.getElementById(`fila-${departamentoId}`);
+                const campoNombre = fila.querySelector('.editable[data-campo="nombre"]');
+                const nombreDepartamento = campoNombre.innerText;
+
+                // Disable content editing
+                disableEditingDepartamento(departamentoId);
+
+                try {
+                    // Make a request to save the changes to the server
+                    fetch(`/departamento/${departamentoId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                nombre: nombreDepartamento
+                            })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                response.json()
+                                    .then(datosActualizadosJSON => {
+                                        // Update the department name in the table with the data received from the server
+                                        campoNombre.innerText = datosActualizadosJSON.nombre;
+
+                                        alert('Cambios guardados correctamente');
+
+                                        // Automatically reload the page after showing the alert
+                                        window.location.reload();
+                                    });
+                            } else {
+                                alert('No se pudo guardar los cambios');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al guardar los cambios:', error);
+                        });
+                } catch (error) {
+                    console.error('Error al guardar los cambios:', error);
+                }
+            }
+        }
+
+        // Function to confirm the deletion of the department
+        function confirmarEliminacionDepartamento(departamentoId) {
+            const confirmar = confirm("¿Estás seguro de que deseas eliminar este departamento?");
+
+            if (confirmar) {
+                eliminarDepartamento(departamentoId); // Llamar a la función para eliminar el departamento
+            }
+        }
+
+        // Function to delete the department through a request to the server
+        async function eliminarDepartamento(departamentoId) {
+            try {
+                const response = await fetch(`/departamento/${departamentoId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    // Successful deletion, reload the page to see the changes
+                    alert('Departamento eliminado correctamente');
+                    window.location.reload();
+                } else {
+                    // An error occurred while deleting the department
+                    alert('No se pudo eliminar el departamento');
+                }
+            } catch (error) {
+                console.error('Error al eliminar departamento:', error);
+                alert('Ocurrió un error al eliminar el departamento');
+            }
+        }
+
+        // TERMINA DEPARTAMENTO
+    </script>
 </body>
 
 </html>

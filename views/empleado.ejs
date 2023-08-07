@@ -3,10 +3,14 @@
 
 <head>
     <title>Formulario de empleado</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script type="module" src="/script.js"></script>
 </head>
 
 <body>
+
+    <div id="mensaje"></div>
+
     <nav>
         <ul id="menu">
             <li><a href="empleado">Registrar Empleado</a></li>
@@ -16,7 +20,7 @@
 
     <h1>Formulario de Empleado</h1>
 
-    <form id="registrarse" onsubmit="return validateFormEmpleado()" action="/empleado" method="post">
+    <form id="registrarse" method="post">
         <label for="nombre">Nombre de empleado:</label>
         <input type="text" id="nombre" name="nombre" required>
         <br>
@@ -33,12 +37,12 @@
         <input type="text" id="direccion" name="direccion" required>
         <br>
 
-        <label for="fecha_naciemiento">Fecha de nacimiento:</label>
+        <label for="fecha_nacimiento">Fecha de nacimiento:</label>
         <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
         <br>
 
+
         <label for="observaciones">Observación:</label>
-        <!-- <input type="text" id="observacion" name="observacion" required> -->
         <textarea id="observaciones" name="observaciones" required rows="4" cols="40" placeholder="Escriba sus observaciones aquí"></textarea>
         <br>
 
@@ -48,55 +52,309 @@
 
         <label for="id_departamento">Escoger departamento:</label>
         <select id="id_departamento" name="id_departamento" required>
-            <% datos_departamento.forEach((item) => { %>
-            <option value="<%= item.id_departamento %>"><%= item.nombre %></option>
-            <% }); %>
-        </select>
+                <% datos_departamento.forEach((item) => { %>
+                <option value="<%= item.id_departamento %>"><%= item.nombre %></option>
+                <% }); %>
+            </select>
         <br>
 
-
-        <input type="submit" value="Registrarse">
+        <input type="submit" value="Registrarse" onclick="agregarEmpleado()">
     </form>
+    <center>
+        <h1>Empleados</h1>
 
-    <h1>Empleados</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Telefono</th>
+                    <th>Dirección</th>
+                    <th>Fecha de nacimiento</th>
+                    <th>Observaciones</th>
+                    <th>Sueldo</th>
+                    <th>Departamento</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (datos_empleado.length > 0) { %>
+                    <% datos_empleado.forEach((item) => { %>
+                        <tr id="fila-<%= item.id_empleado %>">
+                            <td class="editable" data-campo="nombre">
+                                <%= item.nombre %>
+                            </td>
+                            <td class="editable" data-campo="apellido">
+                                <%= item.apellido %>
+                            </td>
+                            <td class="editable" data-campo="telefono">
+                                <%= item.telefono %>
+                            </td>
+                            <td class="editable" data-campo="direccion">
+                                <%= item.direccion %>
+                            </td>
+                            <td class="editable" data-campo="fecha_nacimiento">
+                                <% 
+                             // Primero, convierte la cadena de la fecha de nacimiento en un objeto Date
+                             const fechaNacimientoObj = new Date(item.fecha_nacimiento);
+                        
+                             // Luego, obtén los componentes de la fecha (día, mes y año)
+                             const dia = fechaNacimientoObj.getDate();
+                             const mes = fechaNacimientoObj.getMonth() + 1; // Los meses en JavaScript son indexados desde 0, así que sumamos 1 para obtener el mes correcto
+                             const anio = fechaNacimientoObj.getFullYear();
+                        
+                             // Ahora, formatea la fecha en el formato deseado
+                             const fechaFormateada = `${dia < 10 ? '0' : ''}${dia}-${mes < 10 ? '0' : ''}${mes}-${anio}`;
+                          %>
+                                    <%= fechaFormateada %>
+                            </td>
+                            <td class="editable" data-campo="observaciones">
+                                <%= item.observaciones %>
+                            </td>
+                            <td class="editable" data-campo="sueldo">
+                                <%= item.sueldo %>
+                            </td>
+                            <td class="editable" id="departamento-<%= item.id_empleado %>">
+                                <!-- Agrega un campo oculto para almacenar el valor seleccionado -->
+                                <input type="hidden" name="id_departamento" value="<%= item.id_departamento %>">
+                                <select name="departamento" required disabled>
+                                <!-- Mantén el atributo "disabled" aquí -->
+                                <% datos_departamento.forEach((itemDepartamento) => { %>
+                                    <% if (itemDepartamento.id_departamento === item.id_departamento) { %>
+                                        <option value="<%= itemDepartamento.id_departamento %>" selected><%= itemDepartamento.nombre %></option>
+                                    <% } else { %>
+                                        <option value="<%= itemDepartamento.id_departamento %>"><%= itemDepartamento.nombre %></option>
+                                    <% } %>
+                                <% }); %>
+                            </select>
+                            </td>
+                            <td>
+                                <button onclick="editarEmpleado('<%= item.id_empleado %>')" data-action="editar">Editar</button>
+                                <button onclick="guardarCambios('<%= item.id_empleado %>')" data-action="guardar" style="display: none;">Guardar</button>
+                            </td>
+                            <td>
+                                <button onclick="confirmarEliminacion('<%= item.id_empleado %>')" data-action="eliminar">Eliminar</button>
+                            </td>
 
-    <% if (datos_empleado.length > 0) { %>
-        <ul>
-            <% datos_empleado.forEach((item) => { %>
-                <!-- nombre, apellido, telefono, direccion, fecha_nacimiento, observaciones, sueldo, departamento -->
-                <li>
-                    <%= item.nombre %>
-                </li>
-                <li>
-                    <%= item.apellido %>
-                </li>
-                <li>
-                    <%= item.telefono %>
-                </li>
-                <li>
-                    <%= item.direccion %>
-                </li>
-                <li>
-                    <%= item.fecha_nacimiento %>
-                </li>
-                <li>
-                    <%= item.observaciones %>
-                </li>
-                <li>
-                    <%= item.sueldo %>
-                </li>
-                <li>
-                    <%= item.id_departamento %>
-                </li>
-                <% }); %>
-        </ul>
-        <% } else { %>
-            <p>No se encontraron datos_empleado</p>
-            <% } %>
+
+                        </tr>
+                        <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="10">No se encontraron datos_empleado</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+        <center>
 
 
 
-                <script src="script.js"></script>
+            <script>
+                // EMPLEADO
+
+                async function agregarEmpleado() {
+                    // Desactivar el botón de "Registrarse" para evitar envíos duplicados
+                    const botonRegistrar = document.querySelector('input[type="submit"]');
+                    botonRegistrar.disabled = true;
+
+                    // Obtener los valores de los campos del formulario
+                    const nombre = document.getElementById('nombre').value;
+                    const apellido = document.getElementById('apellido').value;
+                    const telefono = document.getElementById('telefono').value;
+                    const direccion = document.getElementById('direccion').value;
+                    const fechaNacimiento = document.getElementById('fecha_nacimiento').value;
+                    const observaciones = document.getElementById('observaciones').value;
+                    const sueldo = parseFloat(document.getElementById('sueldo').value); // Convertir a número
+                    const idDepartamento = document.getElementById('id_departamento').value;
+
+                    // Crear un objeto con los datos del nuevo empleado
+                    const nuevoEmpleado = {
+                        nombre,
+                        apellido,
+                        telefono,
+                        direccion,
+                        fecha_nacimiento: fechaNacimiento,
+                        observaciones,
+                        sueldo,
+                        id_departamento: parseInt(idDepartamento), // Convertir a número entero
+                    };
+
+                    try {
+                        // Realizar la solicitud POST para agregar el empleado
+                        const response = await fetch('/empleado', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(nuevoEmpleado)
+                        });
+
+                        if (response.ok) {
+                            // Mostrar la alerta de éxito
+                            alert('Empleado agregado correctamente');
+
+                            // Recargar la página para ver los cambios
+                            window.location.reload();
+                        } else {
+                            // Mostrar la alerta de error si no se pudo agregar el empleado
+                            const errorMessage = await response.text();
+                            alert(errorMessage);
+                        }
+                    } catch (error) {
+                        console.error('Error al agregar el empleado:', error);
+                    } finally {
+                        // Habilitar nuevamente el botón de "Registrarse" después de procesar la solicitud
+                        botonRegistrar.disabled = false;
+                    }
+                }
+
+                let isEditing = false; // Variable para controlar si se está editando el campo del departamento
+
+                function editarEmpleado(empleadoId) {
+                    if (!isEditing) {
+                        const fila = document.getElementById(`fila-${empleadoId}`);
+                        const campos = fila.querySelectorAll('.editable');
+
+                        campos.forEach((campo) => {
+                            campo.setAttribute('contenteditable', 'true'); // Habilitar la edición del contenido
+                        });
+
+                        // Habilitar el <select> del departamento solo si el botón de editar ha sido presionado
+                        const selectDepartamento = document.getElementById(`departamento-${empleadoId}`).querySelector('select');
+                        selectDepartamento.removeAttribute('disabled');
+
+                        // Mostrar el botón de "Guardar" y ocultar el botón de "Editar"
+                        const editarButton = fila.querySelector('button[data-action="editar"]');
+                        const guardarButton = fila.querySelector('button[data-action="guardar"]');
+                        editarButton.style.display = 'none';
+                        guardarButton.style.display = 'inline';
+
+                        isEditing = true; // Establecer que se está editando
+                    }
+                }
+
+                function disableEditing(empleadoId) {
+                    if (isEditing) {
+                        const fila = document.getElementById(`fila-${empleadoId}`);
+                        const campos = fila.querySelectorAll('.editable');
+
+                        campos.forEach((campo) => {
+                            campo.removeAttribute('contenteditable'); // Deshabilitar la edición del contenido
+                        });
+
+                        // Deshabilitar el <select> del departamento
+                        const selectDepartamento = document.querySelectorAll('[name="departamento"]');
+                        selectDepartamento.forEach((select) => {
+                            select.setAttribute('disabled', 'disabled');
+                        });
+
+                        // Mostrar el botón de "Editar" y ocultar el botón de "Guardar"
+                        const editarButton = fila.querySelector('button[data-action="editar"]');
+                        const guardarButton = fila.querySelector('button[data-action="guardar"]');
+                        editarButton.style.display = 'inline';
+                        guardarButton.style.display = 'none';
+
+                        isEditing = false; // Establecer que se ha terminado la edición
+                    }
+                }
+
+                async function guardarCambios(empleadoId) {
+                    if (isEditing) {
+                        const fila = document.getElementById(`fila-${empleadoId}`);
+                        const campos = fila.querySelectorAll('.editable');
+
+                        const datosActualizados = {};
+
+                        // Deshabilitar la edición del contenido
+                        disableEditing(empleadoId);
+
+                        campos.forEach((campo) => {
+                            const campoNombre = campo.dataset.campo; // El atributo data-campo contiene el nombre del campo en la base de datos
+                            datosActualizados[campoNombre] = campo.innerText;
+                        });
+
+                        // Obtener el valor seleccionado del departamento desde el campo oculto
+                        const selectDepartamento = fila.querySelector('select[name="departamento"]');
+                        const idDepartamento = selectDepartamento.value;
+                        datosActualizados['id_departamento'] = idDepartamento;
+
+                        try {
+                            // Realizar la solicitud para guardar los cambios en el servidor
+                            const response = await fetch(`/empleado/${empleadoId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(datosActualizados)
+                            });
+
+                            if (response.ok) {
+                                const datosActualizadosJSON = await response.json();
+                                // Actualizar los datos en la tabla con los datos recibidos del servidor
+                                campos.forEach((campo) => {
+                                    const campoNombre = campo.dataset.campo;
+                                    if (campoNombre === 'fecha_nacimiento') {
+                                        // Formatear la fecha de nacimiento en el formato deseado (dd-mm-yyyy)
+                                        const fechaNacimientoObj = new Date(datosActualizadosJSON[campoNombre]);
+                                        const dia = fechaNacimientoObj.getDate();
+                                        const mes = fechaNacimientoObj.getMonth() + 1;
+                                        const anio = fechaNacimientoObj.getFullYear();
+                                        const fechaFormateada = `${dia < 10 ? '0' : ''}${dia}-${mes < 10 ? '0' : ''}${mes}-${anio}`;
+                                        campo.innerText = fechaFormateada;
+                                    } else {
+                                        campo.innerText = datosActualizadosJSON[campoNombre];
+                                    }
+                                });
+
+                                // También actualizamos el campo oculto del departamento seleccionado
+                                selectDepartamento.value = datosActualizadosJSON['id_departamento'];
+
+                                alert('Cambios guardados correctamente');
+
+                                // Recargar automáticamente la página después de mostrar la alerta
+                                window.location.reload();
+                            } else {
+                                alert('No se pudo guardar los cambios');
+                            }
+                        } catch (error) {
+                            console.error('Error al guardar los cambios:', error);
+                        }
+                    }
+                }
+
+                // Función para confirmar la eliminación del empleado
+                function confirmarEliminacion(empleadoId) {
+                    const confirmacion = confirm("¿Estás seguro de eliminar este empleado?");
+                    if (confirmacion) {
+                        eliminarEmpleado(empleadoId); // Llama a la función para eliminar el empleado
+                    }
+                }
+
+                // Función para eliminar el empleado a través de una solicitud al servidor
+                async function eliminarEmpleado(empleadoId) {
+                    try {
+                        const response = await fetch(`/empleado/${empleadoId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            // Eliminación exitosa, recargar la página para ver los cambios
+                            alert('Empleado eliminado correctamente');
+                            window.location.reload();
+                        } else {
+                            // Ocurrió un error al eliminar el empleado
+                            alert('No se pudo eliminar el empleado');
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar empleado:', error);
+                        alert('Ocurrió un error al eliminar el empleado');
+                    }
+                }
+
+                // TERMINA EMPLEADO
+            </script>
 </body>
 
 </html>

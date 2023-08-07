@@ -76,3 +76,49 @@ nav li a {
 nav li a:hover {
     background-color: #ddd;
 }
+
+
+/* Estilos para los botones */
+
+button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button[data-action="editar"] {
+    background-color: #4CAF50;
+    /* Color de fondo verde */
+    color: white;
+    /* Color de texto blanco */
+}
+
+button[data-action="editar"]:hover {
+    background-color: #45a049;
+    /* Color de fondo verde más oscuro en hover */
+}
+
+button[data-action="guardar"] {
+    background-color: #008CBA;
+    /* Color de fondo azul */
+    color: white;
+    /* Color de texto blanco */
+}
+
+button[data-action="guardar"]:hover {
+    background-color: #007a99;
+    /* Color de fondo azul más oscuro en hover */
+}
+
+button[data-action="eliminar"] {
+    background-color: #f44336;
+    /* Color de fondo rojo */
+    color: white;
+    /* Color de texto blanco */
+}
+
+button[data-action="eliminar"]:hover {
+    background-color: #d32f2f;
+    /* Color de fondo rojo más oscuro en hover */
+}
