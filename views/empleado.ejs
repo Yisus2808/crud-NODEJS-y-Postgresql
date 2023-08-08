@@ -53,11 +53,10 @@
         <label for="id_departamento">Escoger departamento:</label>
         <select id="id_departamento" name="id_departamento" required>
                 <% datos_departamento.forEach((item) => { %>
-                <option value="<%= item.id_departamento %>"><%= item.nombre %></option>
+                    <option value="<%= item.id_departamento %>"><%= item.nombre %></option>
                 <% }); %>
             </select>
         <br>
-
         <input type="submit" value="Registrarse" onclick="agregarEmpleado()">
     </form>
     <center>
